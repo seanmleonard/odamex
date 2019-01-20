@@ -63,6 +63,15 @@ include_directories(${TEXTSCREEN_DIR})
 add_library(${TEXTSCREEN_LIBRARY} STATIC ${TEXTSCREEN_SOURCES} ${TEXTSCREEN_HEADERS})
 message(STATUS "Textscreen will be statically linked.")
 
+# Python 3.X
+# NOTE: this method of locating Python is deprecated in CMake 3.12 and beyond
+find_package(PythonLibs 3 REQUIRED) 
+if(PYTHONLIBS_FOUND)
+  include_directories(${PYTHON_INCLUDE_DIRS})
+else()
+  message(WARNING "Python 3 not found, client target not generated.")
+endif()
+
 # Make sure we don't find libraries that are in Program Files/Odamex
 if(WIN32)
   list(REMOVE_ITEM CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
@@ -220,6 +229,7 @@ if(SDL_VERSION)
     ${CLIENT_SOURCES} ${CLIENT_HEADERS} ${CLIENT_WIN32_RESOURCES}
     ${CLIENT_MAC_OBJC_SOURCES})
   target_link_libraries(odamex ${TEXTSCREEN_LIBRARY})
+  target_link_libraries(odamex ${PYTHON_LIBRARIES})
   target_link_libraries(odamex ${SDL_LINK_LIBRARIES})
 
   target_link_libraries(odamex ${ZLIB_LIBRARY})

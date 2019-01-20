@@ -48,6 +48,15 @@ define_platform()
 # Server definitions
 add_definitions(-DJSON_IS_AMALGAMATION)
 
+# Python 3.X
+# NOTE: this method of locating Python is deprecated in CMake 3.12 and beyond
+find_package(PythonLibs 3 REQUIRED) 
+if(PYTHONLIBS_FOUND)
+  include_directories(${PYTHON_INCLUDE_DIRS})
+else()
+  message(WARNING "Python 3 not found, client target not generated.")
+endif()
+
 if (USE_MINIUPNP)
   add_definitions(-DODA_HAVE_MINIUPNP)
 endif()
@@ -72,6 +81,8 @@ add_executable(odasrv
   ${COMMON_SOURCES} ${COMMON_HEADERS}
   ${SERVER_SOURCES} ${SERVER_HEADERS}
   ${SERVER_WIN32_HEADERS} ${SERVER_WIN32_RESOURCES})
+
+target_link_libraries(odamex ${PYTHON_LIBRARIES})
 
 if (USE_MINIUPNP)
   target_link_libraries(odasrv ${MINIUPNPC_STATIC_LIBRARIES})
