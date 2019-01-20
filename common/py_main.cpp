@@ -5,6 +5,7 @@
 #include "py_main.h"
 #include "py_actor.h"
 
+#include "i_system.h"
 #include "m_fileio.h"
 
 //
@@ -91,6 +92,8 @@ int PythonScriptRunner::teardown()
 //
 int PythonScriptRunner::run(const std::string& module_name, const std::string& func_name, std::vector<PyObject*> args)
 {
+	PyErr_Clear();		// reset error indicator
+
 	PyObject* py_args = PyTuple_New(args.size());
 	for (size_t i = 0; i < args.size(); i++)
 		PyTuple_SetItem(py_args, i, args[i]);
@@ -101,37 +104,81 @@ int PythonScriptRunner::run(const std::string& module_name, const std::string& f
 	if (module)
 	{
 		PyObject* func = PyObject_GetAttrString(module, func_name.c_str());
-		if (func)
+		if (func && PyCallable_Check(func))
 		{
-			if (PyCallable_Check(func))
-			{
-				PyObject* py_ret = PyObject_CallObject(func, py_args);
-				if (!py_ret)
-				{
-					Printf(PRINT_HIGH, "Error executing Python callable %s.%s\n",
-							module_name.c_str(),
-							func_name.c_str());
-				}
+			PyObject* py_ret = PyObject_CallObject(func, py_args);
+			if (py_ret)
 				ret = PyLong_AsLong(py_ret);
-				Py_XDECREF(py_ret);
-			}
-			Py_DECREF(func);
+			Py_XDECREF(py_ret);
 		}
-		else
-		{
-			Printf(PRINT_HIGH, "Unknown Python callable %s.%s\n",
-					module_name.c_str(),
-					func_name.c_str());
-		}
-	}
-	else
-	{
-		Printf(PRINT_HIGH, "Unknown Python module %s\n",
-				module_name.c_str());
+		Py_XDECREF(func);
 	}
 
 	Py_DECREF(py_args);
+
+	handleException();
 	return ret;
+}
+
+
+//
+// PythonScriptRunner::handleException
+//
+// Checks if an uncaught exception occurred and if so, a traceback
+// is printed to the console and I_Error is called.
+//
+void PythonScriptRunner::handleException()
+{
+	if (!PyErr_Occurred())
+		return;
+
+	std::string traceback_message;
+
+	PyObject *py_type, *py_value, *py_traceback;
+	PyErr_Fetch(&py_type, &py_value, &py_traceback);
+	PyErr_NormalizeException(&py_type, &py_value, &py_traceback);
+
+	PyObject* py_module = PyImport_AddModule("traceback");
+	if (py_module)
+	{
+		PyObject* py_func = PyObject_GetAttrString(py_module, "format_exception");
+		if (py_func && PyCallable_Check(py_func))
+		{
+			PyObject* py_fulltraceback = PyObject_CallFunctionObjArgs(py_func, py_type, py_value, py_traceback, NULL);
+			if (py_fulltraceback)
+			{
+				Py_ssize_t size = PyList_Size(py_fulltraceback);
+				for (Py_ssize_t i = 0; i < size; i++)
+				{
+					PyObject* py_str = PyList_GetItem(py_fulltraceback, i);
+					if (!traceback_message.empty())
+						traceback_message += '\n';
+					traceback_message += std::string(PyUnicode_AsUTF8(py_str));
+					Py_DECREF(py_str);
+				}
+				Py_XDECREF(py_fulltraceback);
+			}
+		}
+		Py_XDECREF(py_func);
+    }
+
+	if (traceback_message.empty() && py_type && py_value)
+	{
+		PyObject* py_name = PyObject_GetAttrString(py_type, "__name__");
+		PyObject* py_str = PyObject_Str(py_value);
+		traceback_message = std::string(PyUnicode_AsUTF8(py_name)) + \
+							": " + \
+							std::string(PyUnicode_AsUTF8(py_str));
+
+		Py_XDECREF(py_name);
+		Py_XDECREF(py_str);
+	}
+
+	Py_XDECREF(py_type);
+	Py_XDECREF(py_value);
+	Py_XDECREF(py_traceback);
+
+	I_Error(traceback_message.c_str());
 }
 
 

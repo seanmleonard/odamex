@@ -20,6 +20,7 @@ private:
 	int importModule(const std::string& path, const std::string& name, const char* data);
 	int importModuleFromFile(const std::string& path, const std::string& base_path);
 	int importModules();
+	void handleException();
 };
 
 
