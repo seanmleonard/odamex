@@ -77,6 +77,8 @@
 #include "res_texture.h"
 #include "w_ident.h"
 
+#include "py_main.h"
+
 EXTERN_CVAR (sv_timelimit)
 EXTERN_CVAR (sv_nomonsters)
 EXTERN_CVAR (sv_monstersrespawn)
@@ -164,6 +166,8 @@ void D_Init()
 	Z_Init(use_zone);
 	if (first_time)
 		Printf(PRINT_HIGH, "Z_Init: Heapsize: %u megabytes\n", got_heapsize);
+	
+	Py_Init();
 
 	// Load palette and set up colormaps
 	V_InitPalette("PLAYPAL");
@@ -224,6 +228,8 @@ void STACK_ARGS D_Shutdown()
 	UndoDehPatch();
 
 	GStrings.FreeData();
+
+	Py_Shutdown();
 
 	// close all open WAD files
 	W_Close();

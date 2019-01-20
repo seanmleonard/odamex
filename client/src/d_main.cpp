@@ -93,6 +93,8 @@
 #include "res_texture.h"
 #include "w_ident.h"
 
+#include "py_main.h"
+
 #ifdef GEKKO
 #include "i_wii.h"
 #endif
@@ -583,6 +585,8 @@ void D_Init()
 	if (first_time)
 		Printf(PRINT_HIGH, "Z_Init: Heapsize: %u megabytes\n", got_heapsize);
 
+	Py_Init();
+
 	// Load palette and set up colormaps
 	V_Init();
 
@@ -702,6 +706,8 @@ void STACK_ARGS D_Shutdown()
 //	R_ShutdownColormaps();
 
 	V_Close();
+
+	Py_Shutdown();
 
 	// reset the Zone memory manager
 	Z_Close();
