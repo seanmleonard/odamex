@@ -38,6 +38,7 @@
 #include "p_mobj.h"
 #include "p_ctf.h"
 #include "gi.h"
+#include "py_main.h"
 
 #define WATER_SINK_FACTOR		3
 #define WATER_SINK_SMALL_FACTOR	4
@@ -639,6 +640,8 @@ void P_TestActorMovement(AActor *mo, fixed_t tryx, fixed_t tryy, fixed_t tryz,
 //
 void AActor::RunThink ()
 {
+	Py_RunActorThinker(this);
+
 	if(!subsector)
 		return;
 
