@@ -652,7 +652,7 @@ private:
 	// non-member friend functions
 	// ------------------------------------------------------------------------
 
-	friend struct hashfunc<OString>;
+	friend struct ostring_hashfunc<OString>;
 };
 
 
@@ -660,7 +660,7 @@ private:
 // hash function for OHashTable class
 // ----------------------------------------------------------------------------
 
-template <> struct hashfunc<OString>
+template <> struct ostring_hashfunc<OString>
 {   size_t operator()(const OString& str) const { return str.mId; } };
 
 

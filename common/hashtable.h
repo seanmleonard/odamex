@@ -53,7 +53,7 @@ template <typename KT, typename VT, typename HF> class OHashTable;
 
 // Default hash functors for integer & string types
 template <typename KT>
-struct hashfunc
+struct ostring_hashfunc
 { };
 
 // ----------------------------------------------------------------------------
@@ -106,25 +106,25 @@ static inline unsigned int __hash_jenkins_64bit(unsigned long long key)
 	return c;
 }
 
-template <> struct hashfunc<unsigned char>
+template <> struct ostring_hashfunc<unsigned char>
 {	unsigned int operator()(unsigned char val) const { return __hash_jenkins_32bit(val); }	};
 
-template <> struct hashfunc<signed char>
+template <> struct ostring_hashfunc<signed char>
 {	unsigned int operator()(signed char val) const { return __hash_jenkins_32bit(val); }	};
 
-template <> struct hashfunc<unsigned short>
+template <> struct ostring_hashfunc<unsigned short>
 {	unsigned int operator()(unsigned short val) const { return __hash_jenkins_32bit(val); }	};
 
-template <> struct hashfunc<signed short>
+template <> struct ostring_hashfunc<signed short>
 {	unsigned int operator()(signed short val) const { return __hash_jenkins_32bit(val); }	};
 
-template <> struct hashfunc<unsigned int>
+template <> struct ostring_hashfunc<unsigned int>
 {	unsigned int operator()(unsigned int val) const { return __hash_jenkins_32bit(val); }	};
 
-template <> struct hashfunc<signed int>
+template <> struct ostring_hashfunc<signed int>
 {	unsigned int operator()(signed int val) const { return __hash_jenkins_32bit(val); }		};
 
-template <> struct hashfunc<unsigned long>
+template <> struct ostring_hashfunc<unsigned long>
 {
 	unsigned int operator()(unsigned long val) const
 	{
@@ -135,7 +135,7 @@ template <> struct hashfunc<unsigned long>
 	}
 };
 
-template <> struct hashfunc<signed long>
+template <> struct ostring_hashfunc<signed long>
 {
 	unsigned int operator()(signed long val) const
 	{
@@ -146,13 +146,13 @@ template <> struct hashfunc<signed long>
 	}
 };
 
-template <> struct hashfunc<unsigned long long>
+template <> struct ostring_hashfunc<unsigned long long>
 {	unsigned int operator()(unsigned long long val) const { return __hash_jenkins_64bit(val); }	};
 
-template <> struct hashfunc<signed long long>
+template <> struct ostring_hashfunc<signed long long>
 {	unsigned int operator()(signed long long val) const { return __hash_jenkins_64bit(val); }	};
 
-template <> struct hashfunc<void*>
+template <> struct ostring_hashfunc<void*>
 {
 	unsigned int operator()(void* ptr) const
 	{
@@ -171,13 +171,13 @@ static inline unsigned int __hash_cstring(const char* str)
 	return val;	
 }
 
-template <> struct hashfunc<char*>
+template <> struct ostring_hashfunc<char*>
 {	unsigned int operator()(const char* str) const { return __hash_cstring(str); } };
 
-template <> struct hashfunc<const char*>
+template <> struct ostring_hashfunc<const char*>
 {	unsigned int operator()(const char* str) const { return __hash_cstring(str); } };
 
-template <> struct hashfunc<std::string>
+template <> struct ostring_hashfunc<std::string>
 {	unsigned int operator()(const std::string& str) const { return __hash_cstring(str.c_str()); } };
 
 
@@ -189,7 +189,7 @@ template <> struct hashfunc<std::string>
 // is done quickly by iterating through the internal array of key/value pairs.
 // ----------------------------------------------------------------------------
 
-template <typename KT, typename VT, typename HF = hashfunc<KT> >
+template <typename KT, typename VT, typename HF = ostring_hashfunc<KT> >
 class OHashTable
 {
 private:
