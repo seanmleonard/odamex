@@ -82,7 +82,7 @@ add_executable(odasrv
   ${SERVER_SOURCES} ${SERVER_HEADERS}
   ${SERVER_WIN32_HEADERS} ${SERVER_WIN32_RESOURCES})
 
-target_link_libraries(odamex ${PYTHON_LIBRARIES})
+target_link_libraries(odasrv ${PYTHON_LIBRARIES})
 
 if (USE_MINIUPNP)
   target_link_libraries(odasrv ${MINIUPNPC_STATIC_LIBRARIES})
