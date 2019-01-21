@@ -52,6 +52,8 @@
 #include "m_vectors.h"
 #include <math.h>
 
+#include "r_polymer.h"
+
 planefunction_t 		floorfunc;
 planefunction_t 		ceilingfunc;
 
@@ -194,7 +196,8 @@ void R_MapSlopedPlane(int y, int x1, int x2)
 	dspan.x1 = x1;
 	dspan.x2 = x2;
 
-	spanslopefunc();
+	SpanRasterizer<palindex_t, argb_t> rasterizer(dspan);
+	rasterizer.rasterize<DirectSlopeColormapFunc>();
 }
 
 
